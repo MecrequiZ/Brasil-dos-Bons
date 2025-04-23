@@ -1,10 +1,50 @@
-<!DOCTYPE html>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brasil dos Bons: Voto Livre, Cidadania Forte</title>
     <meta name="description" content="Acabe com o voto obrigatório e implemente educação cívica para transformar o Brasil em uma referência global. Compartilhe essa ideia!">
+    <meta name="keywords" content="voto facultativo, educação cívica, corrupção Brasil, cidadania, Brasil dos Bons">
     <style>
         * {
             margin: 0;
@@ -77,15 +117,27 @@
             margin-bottom: 20px;
         }
 
-        section p, section ul {
+        section p, section ul, section ol {
             font-size: 1.1em;
             line-height: 1.6;
             margin-bottom: 20px;
         }
 
-        section ul {
-            list-style: disc;
+        section ul, section ol {
             padding-left: 20px;
+        }
+
+        section ol li {
+            margin-bottom: 10px;
+        }
+
+        section a {
+            color: #002776;
+            text-decoration: underline;
+        }
+
+        section a:hover {
+            color: #ffdf00;
         }
 
         .cta-button {
@@ -196,6 +248,7 @@
             <li><a href="#solucao">A Solução</a></li>
             <li><a href="#beneficios">Benefícios</a></li>
             <li><a href="#participe">Participe</a></li>
+            <li><a href="#fontes">Fontes</a></li>
         </ul>
     </nav>
 
@@ -240,6 +293,20 @@
             <a href="https://api.whatsapp.com/send?text=Transforme o Brasil com voto livre e cidadania forte! Confira: brasil-dos-bons.com" target="_blank" class="whatsapp">Compartilhar no WhatsApp</a>
             <a href="mailto:?subject=Transforme o Brasil!&body=Conheça o movimento para acabar com o voto obrigatório e ensinar cidadania: brasil-dos-bons.com" target="_blank" class="email">Enviar por E-mail</a>
         </div>
+    </section>
+
+    <section id="fontes">
+        <h2>Fontes</h2>
+        <p>Nossa proposta é baseada em dados e estudos confiáveis. Confira as fontes:</p>
+        <ol>
+            <li>Transparência Internacional (2023). <a href="https://www.transparency.org/en/cpi/2023" target="_blank">Índice de Percepção da Corrupção</a>. Brasil na 94ª posição entre 180 países.</li>
+            <li>Datafolha (2022). <a href="https://www1.folha.uol.com.br/poder/2022/10/30-dos-brasileiros-desconfiam-de-fraude-nas-urnas-diz-datafolha.shtml" target="_blank">Pesquisa sobre confiança nas urnas</a>. 30% dos brasileiros desconfiam do sistema eleitoral.</li>
+            <li>IBGE (2022). <a href="https://www.ibge.gov.br/estatisticas/sociais/populacao.html" target="_blank">Pesquisa Nacional por Amostra de Domicílios</a>. Apenas 25% dos brasileiros acompanham a política regularmente.</li>
+            <li>Transparência Internacional (2021). <a href="https://www.transparency.org/en/gcb" target="_blank">Barômetro Global da Corrupção</a>. 55% dos brasileiros consideram aceitável oferecer subornos por serviços.</li>
+            <li>Banco Mundial (2022). <a href="https://data.worldbank.org/indicator/SI.POV.GINI?locations=BR" target="_blank">Índice Gini</a>. Brasil é o 9º país mais desigual do mundo (Gini 0,48).</li>
+            <li>TSE (2022). <a href="https://www.tse.jus.br/eleicoes/estatisticas/estatisticas-eleitorais" target="_blank">Estatísticas Eleitorais</a>. 79% de participação nas eleições, com 20% de votos nulos ou brancos.</li>
+            <li>OCDE (2020). <a href="https://www.oecd.org/education/civic-education-in-finland.htm" target="_blank">Educação Cívica na Finlândia</a>. Modelo de ensino de cidadania que reduz a corrupção.</li>
+        </ol>
     </section>
 
     <footer>
