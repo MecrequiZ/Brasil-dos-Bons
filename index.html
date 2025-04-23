@@ -1,49 +1,10 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brasil dos Bons: Voto Livre, Cidadania Forte</title>
-    <meta name="description" content="Acabe com o voto obrigatório e implemente educação cívica para transformar o Brasil em uma referência global. Junte-se ao movimento!">
+    <meta name="description" content="Acabe com o voto obrigatório e implemente educação cívica para transformar o Brasil em uma referência global. Compartilhe essa ideia!">
     <style>
         * {
             margin: 0;
@@ -143,39 +104,10 @@
             background-color: #e6c700;
         }
 
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        form input, form textarea {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 1em;
-        }
-
-        form button {
-            background-color: #009c3b;
-            color: white;
-            border: none;
-            padding: 15px;
-            font-size: 1.1em;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        form button:hover {
-            background-color: #007a2f;
-        }
-
         .share-buttons {
             display: flex;
-            gap: 10px;
+            flex-wrap: wrap;
+            gap: 15px;
             justify-content: center;
             margin-top: 20px;
         }
@@ -183,14 +115,33 @@
         .share-buttons a {
             background-color: #002776;
             color: white;
-            padding: 10px 20px;
+            padding: 15px 30px;
             text-decoration: none;
-            border-radius: 5px;
-            font-size: 0.9em;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.2s;
         }
 
         .share-buttons a:hover {
             background-color: #001a4d;
+            transform: scale(1.05);
+        }
+
+        .share-buttons a.whatsapp {
+            background-color: #25D366;
+        }
+
+        .share-buttons a.whatsapp:hover {
+            background-color: #1DA851;
+        }
+
+        .share-buttons a.email {
+            background-color: #009c3b;
+        }
+
+        .share-buttons a.email:hover {
+            background-color: #007a2f;
         }
 
         footer {
@@ -220,13 +171,23 @@
                 margin: 20px;
                 padding: 15px;
             }
+
+            .share-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .share-buttons a {
+                width: 100%;
+                text-align: center;
+            }
         }
     </style>
 </head>
 <body>
     <header>
         <h1>Brasil dos Bons: Voto Livre, Cidadania Forte</h1>
-        <p>Junte-se ao movimento para acabar com o voto obrigatório e ensinar cidadania nas escolas, transformando o Brasil em uma referência global!</p>
+        <p>Compartilhe essa ideia para acabar com o voto obrigatório e ensinar cidadania nas escolas, transformando o Brasil em uma referência global!</p>
     </header>
 
     <nav>
@@ -257,7 +218,7 @@
             <li><strong>Educação Cívica Obrigatória</strong>: Incluir a disciplina “Cidadania e Ética” nas escolas, ensinando transparência, responsabilidade e como combater a corrupção.</li>
         </ul>
         <p>Essas mudanças são fáceis de implementar, baratas e respeitam a democracia, criando cidadãos conscientes e um sistema político mais ético.</p>
-        <a href="#participe" class="cta-button">Quero Apoiar!</a>
+        <a href="#participe" class="cta-button">Espalhe Essa Ideia!</a>
     </section>
 
     <section id="beneficios">
@@ -273,22 +234,16 @@
 
     <section id="participe">
         <h2>Participe do Movimento!</h2>
-        <p>Assine nossa petição para acabar com o voto obrigatório e implementar educação cívica. Compartilhe com amigos e ajude a transformar o Brasil!</p>
-        <form action="https://formspree.io/f/xovdqpre" method="POST">
-            <input type="text" name="name" placeholder="Seu Nome" required>
-            <input type="email" name="email" placeholder="Seu E-mail" required>
-            <textarea name="message" placeholder="Por que você apoia essa causa?" rows="4"></textarea>
-            <button type="submit">Assinar Petição</button>
-        </form>
+        <p>Espalhe a ideia de um Brasil melhor! Compartilhe nas redes sociais e ajude a transformar o Brasil em uma referência global com voto livre e cidadania forte!</p>
         <div class="share-buttons">
             <a href="https://x.com/intent/tweet?text=Transforme o Brasil com voto livre e cidadania forte! Junte-se ao movimento: brasil-dos-bons.com #VotoFacultativo" target="_blank">Compartilhar no X</a>
-            <a href="https://api.whatsapp.com/send?text=Transforme o Brasil com voto livre e cidadania forte! Confira: brasil-dos-bons.com" target="_blank">Compartilhar no WhatsApp</a>
-            <a href="mailto:?subject=Transforme o Brasil!&body=Conheça o movimento para acabar com o voto obrigatório e ensinar cidadania: brasil-dos-bons.com" target="_blank">Enviar por E-mail</a>
+            <a href="https://api.whatsapp.com/send?text=Transforme o Brasil com voto livre e cidadania forte! Confira: brasil-dos-bons.com" target="_blank" class="whatsapp">Compartilhar no WhatsApp</a>
+            <a href="mailto:?subject=Transforme o Brasil!&body=Conheça o movimento para acabar com o voto obrigatório e ensinar cidadania: brasil-dos-bons.com" target="_blank" class="email">Enviar por E-mail</a>
         </div>
     </section>
 
     <footer>
-        <p>&copy; 2025 Brasil dos Bons. Todos os direitos reservados.</p>
+        <p>© 2025 Brasil dos Bons. Todos os direitos reservados.</p>
         <p>Contato: <a href="mailto:contato@brasil-dos-bons.com">contato@brasil-dos-bons.com</a> | Siga-nos no <a href="https://x.com/brasildosbons" target="_blank">X</a></p>
     </footer>
 
@@ -300,11 +255,6 @@
                 const targetId = this.getAttribute('href').substring(1);
                 document.getElementById(targetId).scrollIntoView({ behavior: 'smooth' });
             });
-        });
-
-        // Confirmação de envio do formulário
-        document.querySelector('form').addEventListener('submit', function(e) {
-            alert('Obrigado por apoiar! Sua assinatura foi enviada.');
         });
     </script>
 </body>
